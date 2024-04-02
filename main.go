@@ -61,10 +61,6 @@ type Issue struct {
 	Repository       Repository  `json:"repository"`
 }
 
-const BASE_URL = "https://git.dev.solved.cz/api/v1/repos/"
-
-// "https://git.dev.solved.czSolvedOrg/homepage/issues?state=open&type=issues"
-
 func getURL() (string, error) {
 	cmd := exec.Command("git", "remote", "get-url", "origin")
 	stdout, err := cmd.Output()
