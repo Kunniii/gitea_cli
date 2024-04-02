@@ -1,6 +1,6 @@
 # Gitea CLI todo
 
-- [ ] Show open issues
+- [x] Show open issues
 - [ ] Show closed issues
 - [ ] Show issues based on user input
 - [ ] Show issue details
