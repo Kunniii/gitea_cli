@@ -89,15 +89,16 @@ func loadToken() string {
 func prettyPrintIssue(issue Issue) {
 	var border = lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
+		Width(80).
 		Padding(1, 2)
 
 	var issueTitleStyle = lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("47"))
+		Foreground(lipgloss.Color("10"))
 
 	var issueNumberStyle = lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("63"))
+		Foreground(lipgloss.Color("12"))
 
 	var issueNumberString = issueNumberStyle.Render(fmt.Sprintf("#%d", issue.Number))
 
@@ -118,9 +119,19 @@ func prettyPrintIssue(issue Issue) {
 func main() {
 
 	var token = loadToken()
+	var err error
 
-	var urlString, _ = getURL()
-	var url, _ = url.Parse(urlString)
+	urlString, err := getURL()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	urlString, _ = strings.CutSuffix(urlString, "\n")
+
+	url, err := url.Parse(urlString)
+	if err != nil {
+		log.Fatal(err)
+	}
 	var reqURI = url.RequestURI()
 	reqURI, _ = strings.CutSuffix(reqURI, ".git")
 	var apiURL = "https://" + url.Hostname() + "/api/v1/repos" + reqURI + "/issues?state=open&type=issues"
