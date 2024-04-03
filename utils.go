@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/kunniii/gitea_cli/models"
 	"golang.org/x/term"
 )
 
@@ -17,10 +18,42 @@ func printHelp() {
 		Bold(true).
 		Render(
 			"\nUsage: gitea <status> <type>\n\n" +
+				"\t+ status: all, open, closed\n" +
+				"\t+ type  : issues, pulls\n\n" +
 				"Commands:\n" +
 				"\t$ gitea all issues\n" +
 				"\t$ gitea open pulls\n"),
 	)
+}
+
+func prettyPrint(issue models.Issue_Pull) {
+	var border = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		Width(80).
+		Padding(1, 2)
+
+	var issueTitleStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("10"))
+
+	var issueNumberStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("12"))
+
+	var issueNumberString = issueNumberStyle.Render(fmt.Sprintf("#%d", issue.Number))
+
+	var issueStyleString = issueTitleStyle.Render(issue.Title)
+
+	fmt.Println(border.Render(
+		fmt.Sprintf(
+			"%s: %s\n%s\n-%s-",
+			issueNumberString,
+			issueStyleString,
+			issue.HTMLURL,
+			issue.User.Login,
+		),
+	))
+
 }
 
 func getURL() (string, error) {
