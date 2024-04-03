@@ -12,10 +12,17 @@ var (
 )
 
 func init() {
-	status = os.Args[1]
-	issueType = os.Args[2]
+	if len(os.Args) == 1 {
+		printHelp()
+		os.Exit(0)
+	}
 
-	if status != "" && status != "all" && status != "open" && status != "closed" {
+	status = os.Args[1]
+	if len(os.Args) > 2 {
+		issueType = os.Args[2]
+	}
+
+	if status != "" && status != "branch" && status != "all" && status != "open" && status != "closed" {
 		printHelp()
 		os.Exit(0)
 	}
@@ -41,13 +48,21 @@ func main() {
 		WithToken(token).
 		WithURL(urlString)
 
-	results, err := gt.getIssues(status, issueType)
-	if err != nil {
-		log.Fatal(err)
-	}
+	if status == "branch" {
+		branches, err := gt.getBranches()
+		if err != nil {
+			log.Fatal(err)
+		}
+		prettyPrintBranches(branches)
+	} else {
+		results, err := gt.getIssues(status, issueType)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, data := range results {
+			prettyPrintIssue_Pull(data)
+		}
 
-	for _, data := range results {
-		prettyPrint(data)
 	}
 
 }

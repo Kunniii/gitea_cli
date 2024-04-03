@@ -26,7 +26,23 @@ func printHelp() {
 	)
 }
 
-func prettyPrint(issue models.Issue_Pull) {
+func prettyPrintBranches(branches []models.Branch) {
+	var border = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		Width(80).
+		Padding(0, 2)
+	var branchStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("0"))
+
+	var data = "\n"
+	for _, branch := range branches {
+		data += branchStyle.Render(branch.Name) + "\n"
+	}
+	fmt.Println(border.Render(data))
+}
+
+func prettyPrintIssue_Pull(issue models.Issue_Pull) {
 	var border = lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
 		Width(80).

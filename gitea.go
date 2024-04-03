@@ -70,3 +70,29 @@ func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull,
 	}
 	return issues, nil
 }
+
+func (gt *Gitea) getBranches() ([]models.Branch, error) {
+	requestURL := gt.BaseURL + "/branches/"
+
+	req, err := http.NewRequest("GET", requestURL, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Add("Authorization", "token "+gt.Token)
+	resp, err := gt.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var branches []models.Branch
+	err = json.Unmarshal(body, &branches)
+	if err != nil {
+		return nil, err
+	}
+	return branches, nil
+}
