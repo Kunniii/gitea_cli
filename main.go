@@ -10,7 +10,7 @@ import (
 	"github.com/kunniii/gitea_cli/models"
 )
 
-func prettyPrintIssue(issue models.Issue) {
+func prettyPrint(issue models.Issue_Pull) {
 	var border = lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
 		Width(80).
@@ -45,37 +45,25 @@ var (
 	issueType string
 )
 
-func printHelp() {
-	fmt.Println(lipgloss.NewStyle().
-		Foreground(lipgloss.Color("10")).
-		Bold(true).
-		Render(
-			"\nUsage: gitea <status> <type>\n\n" +
-				"Commands:\n" +
-				"\t$ gitea all issues\n" +
-				"\t$ gitea open pulls\n"),
-	)
-}
-
 func init() {
 	// check os.args
 	if len(os.Args) == 1 {
-		status = "open"
-		issueType = "issues"
+		status = ""
+		issueType = ""
 	} else if len(os.Args) > 1 {
 		status = os.Args[1]
-		issueType = "issues"
+		issueType = ""
 	} else if len(os.Args) > 2 {
 		status = os.Args[1]
 		issueType = os.Args[2]
 	}
 
-	if status != "all" && status != "open" && status != "closed" {
+	if status != "" && status != "all" && status != "open" && status != "closed" {
 		printHelp()
 		os.Exit(0)
 	}
 
-	if issueType != "issues" && issueType != "pulls" {
+	if issueType != "" && issueType != "issues" && issueType != "pulls" {
 		printHelp()
 		os.Exit(0)
 	}
@@ -96,13 +84,13 @@ func main() {
 		WithToken(token).
 		WithURL(urlString)
 
-	issues, err := gt.getIssues("open", "issues")
+	results, err := gt.getIssues(status, issueType)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, issue := range issues {
-		prettyPrintIssue(issue)
+	for _, issue := range results {
+		prettyPrint(issue)
 	}
 
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -39,16 +38,15 @@ func (gt *Gitea) WithToken(token string) *Gitea {
 	return gt
 }
 
-func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue, error) {
+func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull, error) {
 	if state == "" {
 		state = "open"
 	}
 	if issueType == "" {
 		issueType = "issues"
 	}
-	requestURL := gt.BaseURL + "/issues/" + "?state=" + state + "&type=" + issueType
 
-	fmt.Println(requestURL)
+	requestURL := gt.BaseURL + "/issues/" + "?state=" + state + "&type=" + issueType
 
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
@@ -65,8 +63,7 @@ func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue, erro
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(body))
-	var issues []models.Issue
+	var issues []models.Issue_Pull
 	err = json.Unmarshal(body, &issues)
 	if err != nil {
 		return nil, err

@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Issue struct {
+type Issue_Pull struct {
 	ID               int         `json:"id"`
 	URL              string      `json:"url"`
 	HTMLURL          string      `json:"html_url"`

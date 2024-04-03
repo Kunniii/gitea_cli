@@ -7,8 +7,21 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
+
+func printHelp() {
+	fmt.Println(lipgloss.NewStyle().
+		Foreground(lipgloss.Color("10")).
+		Bold(true).
+		Render(
+			"\nUsage: gitea <status> <type>\n\n" +
+				"Commands:\n" +
+				"\t$ gitea all issues\n" +
+				"\t$ gitea open pulls\n"),
+	)
+}
 
 func getURL() (string, error) {
 	cmd := exec.Command("git", "remote", "get-url", "origin")
