@@ -1,92 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/term"
+	"github.com/kunniii/gitea_cli/models"
 )
 
-type User struct {
-	ID        int    `json:"id"`
-	Login     string `json:"login"`
-	FullName  string `json:"full_name"`
-	Email     string `json:"email"`
-	AvatarURL string `json:"avatar_url"`
-	Language  string `json:"language"`
-	IsAdmin   bool   `json:"is_admin"`
-	LastLogin string `json:"last_login"`
-	Created   string `json:"created"`
-	Username  string `json:"username"`
-}
-
-type Repository struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Owner    string `json:"owner"`
-	FullName string `json:"full_name"`
-}
-
-type Issue struct {
-	ID               int         `json:"id"`
-	URL              string      `json:"url"`
-	HTMLURL          string      `json:"html_url"`
-	Number           int         `json:"number"`
-	User             User        `json:"user"`
-	OriginalAuthor   string      `json:"original_author"`
-	OriginalAuthorID int         `json:"original_author_id"`
-	Title            string      `json:"title"`
-	Body             string      `json:"body"`
-	Labels           []string    `json:"labels"`
-	Milestone        interface{} `json:"milestone"`
-	Assignee         interface{} `json:"assignee"`
-	Assignees        interface{} `json:"assignees"`
-	State            string      `json:"state"`
-	IsLocked         bool        `json:"is_locked"`
-	Comments         int         `json:"comments"`
-	CreatedAt        time.Time   `json:"created_at"`
-	UpdatedAt        time.Time   `json:"updated_at"`
-	ClosedAt         interface{} `json:"closed_at"`
-	DueDate          interface{} `json:"due_date"`
-	PullRequest      interface{} `json:"pull_request"`
-	Repository       Repository  `json:"repository"`
-}
-
-func getURL() (string, error) {
-	cmd := exec.Command("git", "remote", "get-url", "origin")
-	stdout, err := cmd.Output()
-	return string(stdout), err
-}
-
-func loadToken() string {
-	homeDir, _ := os.UserHomeDir()
-	keyFilePath := homeDir + "/.gitea_cli_token"
-
-	if _, err := os.Stat(keyFilePath); os.IsNotExist(err) {
-		fmt.Print("Please enter your Token: ")
-		bytePassword, _ := term.ReadPassword(0)
-		key := string(bytePassword)
-		if err := os.WriteFile(keyFilePath, []byte(key), 0600); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("\nYour token is saved at " + keyFilePath + "\n")
-		return key
-	}
-
-	key, _ := os.ReadFile(keyFilePath)
-	return strings.TrimSpace(string(key))
-}
-
-func prettyPrintIssue(issue Issue) {
+func prettyPrintIssue(issue models.Issue) {
 	var border = lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
 		Width(80).
@@ -116,8 +40,48 @@ func prettyPrintIssue(issue Issue) {
 
 }
 
-func main() {
+var (
+	status    string
+	issueType string
+)
 
+func printHelp() {
+	fmt.Println(lipgloss.NewStyle().
+		Foreground(lipgloss.Color("10")).
+		Bold(true).
+		Render(
+			"\nUsage: gitea <status> <type>\n\n" +
+				"Commands:\n" +
+				"\t$ gitea all issues\n" +
+				"\t$ gitea open pulls\n"),
+	)
+}
+
+func init() {
+	// check os.args
+	if len(os.Args) == 1 {
+		status = "open"
+		issueType = "issues"
+	} else if len(os.Args) > 1 {
+		status = os.Args[1]
+		issueType = "issues"
+	} else if len(os.Args) > 2 {
+		status = os.Args[1]
+		issueType = os.Args[2]
+	}
+
+	if status != "all" && status != "open" && status != "closed" {
+		printHelp()
+		os.Exit(0)
+	}
+
+	if issueType != "issues" && issueType != "pulls" {
+		printHelp()
+		os.Exit(0)
+	}
+}
+
+func main() {
 	var token = loadToken()
 	var err error
 
@@ -128,32 +92,11 @@ func main() {
 
 	urlString, _ = strings.CutSuffix(urlString, "\n")
 
-	url, err := url.Parse(urlString)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var reqURI = url.RequestURI()
-	reqURI, _ = strings.CutSuffix(reqURI, ".git")
-	var apiURL = "https://" + url.Hostname() + "/api/v1/repos" + reqURI + "/issues?state=open&type=issues"
+	var gt = NewGitea().
+		WithToken(token).
+		WithURL(urlString)
 
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", apiURL, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	req.Header.Add("Authorization", "token "+token)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var issues []Issue
-	err = json.Unmarshal(body, &issues)
+	issues, err := gt.getIssues("open", "issues")
 	if err != nil {
 		log.Fatal(err)
 	}
