@@ -17,12 +17,13 @@ func printHelp() {
 		Foreground(lipgloss.Color("10")).
 		Bold(true).
 		Render(
-			"\nUsage: gitea <status> <type>\n\n" +
-				"\t+ status: all, open, closed\n" +
-				"\t+ type  : issues, pulls\n\n" +
+			"\nUsage: gitea <type> <status>\n\n" +
+				"\t+ type  : issue, pull, branch\n" +
+				"\t+ status: all, open, closed\n\n" +
 				"Commands:\n" +
-				"\t$ gitea all issues\n" +
-				"\t$ gitea open pulls\n"),
+				"\t$ gitea issue open\n" +
+				"\t$ gitea pull all\n" +
+				"\t$ gitea branch\n"),
 	)
 }
 

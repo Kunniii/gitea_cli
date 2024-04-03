@@ -46,7 +46,7 @@ func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull,
 		issueType = "issues"
 	}
 
-	requestURL := gt.BaseURL + "/issues/" + "?state=" + state + "&type=" + issueType
+	requestURL := gt.BaseURL + "/issues/" + "?state=" + state + "&type=" + issueType + "s"
 
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {

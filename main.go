@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	status    string
-	issueType string
+	status  string
+	theType string
 )
 
 func init() {
@@ -17,20 +17,21 @@ func init() {
 		os.Exit(0)
 	}
 
-	status = os.Args[1]
+	theType = os.Args[1]
 	if len(os.Args) > 2 {
-		issueType = os.Args[2]
+		status = os.Args[2]
 	}
 
-	if status != "" && status != "branch" && status != "all" && status != "open" && status != "closed" {
+	if theType != "" && theType != "issue" && theType != "pull" && theType != "branch" {
 		printHelp()
 		os.Exit(0)
 	}
 
-	if issueType != "" && issueType != "issues" && issueType != "pulls" {
+	if status != "" && status != "all" && status != "open" && status != "closed" {
 		printHelp()
 		os.Exit(0)
 	}
+
 }
 
 func main() {
@@ -48,14 +49,14 @@ func main() {
 		WithToken(token).
 		WithURL(urlString)
 
-	if status == "branch" {
+	if theType == "branch" {
 		branches, err := gt.getBranches()
 		if err != nil {
 			log.Fatal(err)
 		}
 		prettyPrintBranches(branches)
 	} else {
-		results, err := gt.getIssues(status, issueType)
+		results, err := gt.getIssues(status, theType)
 		if err != nil {
 			log.Fatal(err)
 		}
