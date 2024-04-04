@@ -12,18 +12,20 @@ jobs:
 
       - name: Setup Go environment
         uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.1
 
       - name: Build for Linux amd64
         env:
           GOOS: linux
           GOARCH: amd64
-        run: go build -o gt .
+        run: go build -o gt_linux .
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux_amd64
-          path: gt
+          name: gt
+          path: gt_linux
 
 
   build_windows:
@@ -33,15 +35,17 @@ jobs:
 
       - name: Setup Go environment
         uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.1
 
       - name: Build for Windows amd64
         env:
           GOOS: linux
           GOARCH: amd64
-        run: go build -o gt.exe .
+        run: go build -o gt_windows.exe .
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux_amd64
-          path: gt.exe
+          name: gt.exe
+          path: gt_windows.exe
