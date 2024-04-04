@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -25,7 +25,7 @@ func NewGitea() *Gitea {
 func (gt *Gitea) WithURL(urlString string) *Gitea {
 	u, err := url.Parse(urlString)
 	if err != nil {
-		log.Fatal("Cannot parse URL: ", urlString)
+		printError(fmt.Sprintf("Cannot parse URL: %v", urlString))
 	}
 	reqURI := u.RequestURI()
 	reqURI, _ = strings.CutSuffix(reqURI, ".git")
@@ -38,7 +38,7 @@ func (gt *Gitea) WithToken(token string) *Gitea {
 	return gt
 }
 
-func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull, error) {
+func (gt *Gitea) GetIssues(issueType string, state string) ([]models.Issue_Pull, error) {
 	if state == "" {
 		state = "open"
 	}
@@ -50,7 +50,7 @@ func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull,
 
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
-		log.Fatal(err)
+		printError(err.Error())
 	}
 
 	req.Header.Add("Authorization", "token "+gt.Token)
@@ -71,12 +71,12 @@ func (gt *Gitea) getIssues(state string, issueType string) ([]models.Issue_Pull,
 	return issues, nil
 }
 
-func (gt *Gitea) getBranches() ([]models.Branch, error) {
+func (gt *Gitea) GetBranches() ([]models.Branch, error) {
 	requestURL := gt.BaseURL + "/branches/"
 
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
-		log.Fatal(err)
+		printError(err.Error())
 	}
 
 	req.Header.Add("Authorization", "token "+gt.Token)

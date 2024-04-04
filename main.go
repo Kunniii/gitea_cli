@@ -1,35 +1,37 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strings"
 )
 
 var (
-	status  string
-	theType string
+	category string
+	action   string
+	options  []string
 )
 
 func init() {
+	// gt issue    list       all
+	// gt <category> <action> <option>
+	// gt branch   list
+	// gt issue view id
+	// gt pull view id
+	// gt repo view --web
+
 	if len(os.Args) == 1 {
 		printHelp()
 		os.Exit(0)
 	}
 
-	theType = os.Args[1]
+	category = os.Args[1]
+
 	if len(os.Args) > 2 {
-		status = os.Args[2]
+		action = os.Args[2]
 	}
-
-	if theType != "" && theType != "issue" && theType != "pull" && theType != "branch" {
-		printHelp()
-		os.Exit(0)
-	}
-
-	if status != "" && status != "all" && status != "open" && status != "closed" {
-		printHelp()
-		os.Exit(0)
+	if len(os.Args) > 3 {
+		options = os.Args[3:]
 	}
 
 }
@@ -40,7 +42,7 @@ func main() {
 
 	urlString, err := getURL()
 	if err != nil {
-		log.Fatal(err)
+		printError(err.Error())
 	}
 
 	urlString, _ = strings.CutSuffix(urlString, "\n")
@@ -49,21 +51,23 @@ func main() {
 		WithToken(token).
 		WithURL(urlString)
 
-	if theType == "branch" {
-		branches, err := gt.getBranches()
+	switch category {
+	case "branch":
+		branches, err := gt.GetBranches()
 		if err != nil {
-			log.Fatal(err)
+			printError(err.Error())
 		}
 		prettyPrintBranches(branches)
-	} else {
-		results, err := gt.getIssues(status, theType)
+	case "issue", "pull":
+		results, err := gt.GetIssues(category, action)
 		if err != nil {
-			log.Fatal(err)
+			printError(err.Error())
+		}
+		if len(results) == 0 {
+			printInfo(fmt.Sprintf("There are %s no %ss on this repository", action, category))
 		}
 		for _, data := range results {
 			prettyPrintIssue_Pull(data)
 		}
-
 	}
-
 }

@@ -1,0 +1,31 @@
+name: Build and Publish
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: [ ubuntu-latest, windows-latest ]
+    strategy:
+      matrix:
+        goos: [linux, windows]
+        goarch: [amd64]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v2
+
+      - name: Build for ${{ matrix.goos }}-{{ matrix.goarch }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          go build -o gt .
+
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ runner.os }}_amd64
+          path: gt
