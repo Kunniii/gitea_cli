@@ -5,26 +5,43 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: [ ubuntu-22.04, windows-2022	]
-    strategy:
-      matrix:
-        goos: [linux, windows]
-        goarch: [amd64]
+  build_linux:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Go environment
         uses: actions/setup-go@v5
 
-      - name: Build for ${{ matrix.goos }}-{{ matrix.goarch }}
+      - name: Build for Linux amd64
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
+          GOOS: linux
+          GOARCH: amd64
         run: go build -o gt .
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}_amd64
+          name: linux_amd64
           path: gt
+
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5
+
+      - name: Build for Windows amd64
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: go build -o gt.exe .
+
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_amd64
+          path: gt.exe
