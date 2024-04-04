@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: [ ubuntu-latest, windows-latest ]
+    runs-on: [ ubuntu-22.04, windows-2022	]
     strategy:
       matrix:
         goos: [linux, windows]
